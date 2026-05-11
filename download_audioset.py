@@ -22,8 +22,10 @@ Usage:
 
 import argparse
 import os
+import random
 import subprocess
 import sys
+import time
 import pandas as pd
 
 # All paths relative to the folder this script lives in
@@ -75,6 +77,9 @@ def download_full_video(url, video_id, temp_dir, cookies_file=None):
         "--merge-output-format", "mkv",
         "--js-runtimes", "deno",
         "--remote-components", "ejs:github",
+        "--sleep-requests", "2",
+        "--sleep-interval", "3",
+        "--max-sleep-interval", "6",
     ]
 
     if cookies_file and os.path.exists(cookies_file):
@@ -82,7 +87,11 @@ def download_full_video(url, video_id, temp_dir, cookies_file=None):
 
     result = subprocess.run(yt_cmd, capture_output=True, text=True)
     if result.returncode != 0:
-        print("   [ERROR] yt-dlp: " + result.stderr.strip()[:200])
+        err = result.stderr.strip()[:200]
+        print("   [ERROR] yt-dlp: " + err)
+        if "rate-limited" in err or "rate limited" in err.lower():
+            print("   [WAIT] Rate limited — sleeping 90 seconds...")
+            time.sleep(90)
         return None
 
     # yt-dlp may adjust extension — find actual file
@@ -218,6 +227,10 @@ def main():
             print("   [DEL]  temp file removed")
 
         print()
+
+        # Random sleep between videos to avoid rate limiting
+        sleep_time = random.uniform(3, 7)
+        time.sleep(sleep_time)
 
     print("=" * 60)
     print("Success : " + str(success_clips) + " / " + str(total_clips) + " clips")
