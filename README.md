@@ -64,18 +64,28 @@ pip install -r requirements.txt
 
 ### Ubuntu / Linux
 
-**1. Python, pip, ffmpeg**
+Run these commands **one by one**:
+
+**Step 1 — Create & activate conda environment (Python 3.10)**
 ```bash
-sudo apt update
-sudo apt install python3 python3-pip ffmpeg -y
+conda env list | grep -q 'audioset' || conda create -n audioset python=3.10 -y
+conda activate audioset
 ```
 
-**2. Deno**
+**Step 2 — ffmpeg**
 ```bash
-curl -fsSL https://deno.land/install.sh | sh
+ffmpeg -version 2>/dev/null || { pip install imageio-ffmpeg && mkdir -p ~/bin && cp $(python3 -c "import imageio_ffmpeg; print(imageio_ffmpeg.get_ffmpeg_exe())") ~/bin/ffmpeg && grep -q 'HOME/bin' ~/.bashrc || echo 'export PATH="$HOME/bin:$PATH"' >> ~/.bashrc && export PATH="$HOME/bin:$PATH"; }
 ```
 
-**3. Python packages**
+**Step 3 — Deno**
+```bash
+deno --version 2>/dev/null || curl -fsSL https://deno.land/install.sh | sh
+grep -q 'deno/bin' ~/.bashrc || echo 'export PATH="$HOME/.deno/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc
+conda activate audioset
+```
+
+**Step 4 — Python packages**
 ```bash
 pip install -r requirements.txt
 ```
@@ -94,6 +104,11 @@ pip install -r requirements.txt
 4. Place `cookies.txt` in the same folder as the scripts
 
 
+
+> **Before running any script**, activate the conda environment:
+> ```bash
+> conda activate audioset
+> ```
 
 ## Dataset 1 — AudioSet
 
